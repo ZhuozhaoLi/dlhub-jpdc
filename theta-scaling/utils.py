@@ -4,6 +4,9 @@ def dlhub_test(i, data=[1, 2, 3]):
     import sys, time, os
     sys.path.append("/app")
     os.chdir("/app")
+    sys.stdout = open(os.devnull, "w")
+    sys.stderr = open(os.devnull, "w")
+    os.environ["PYTHONWARNINGS"]= "ignore::DeprecationWarning"
     start = time.time()
     global shim
     if 'shim' not in globals():
