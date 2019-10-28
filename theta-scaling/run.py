@@ -12,13 +12,15 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-r", "--redis_hostname", type=str, default='127.0.0.1',
                     help="Hostname of the Redis server")
 parser.add_argument("-e", "--endpoint_id", type=str,
-                    default="5b8c1de1-c35f-48ae-afed-5a0d2392738b",
+                    default="5dc807eb-da52-4979-8210-1835c7280e76",
                     help="Endpoint_id")
 parser.add_argument("-y", "--endpoint_name", type=str,
                     default="dlhub-theta-remote",
                     help="Endpoint_name")
-parser.add_argument("-t", "--tasks", type=int, default=5000,
+parser.add_argument("-t", "--tasks", type=int, default=1000,
                     help="Number of tasks")
+parser.add_argument("-p", "--priming", type=int, default=1000,
+                    help="Number of priming tasks")
 parser.add_argument("-i", "--num_workers", default=64,
                     type=int, help="maximum workers")
 parser.add_argument("-a", "--workers_per_node",
@@ -133,9 +135,9 @@ def test(tasks=5000, data=[1], timeout=None):
     print("Throughput : {:8.3f} Tasks/s".format(tasks / delta))
     return start_submit, end_submit, returned
 
-# Priming the endpoint with 1000 tasks
+# Priming the endpoint with tasks
 print("\nAll initialization done. Start priming the endpoint")
-test(tasks=1000, data=data)
+test(tasks=args.priming, data=data)
 
 # Testing -- repeat for `trials` times
 print("\nStart testing")
