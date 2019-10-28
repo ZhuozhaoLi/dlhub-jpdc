@@ -25,8 +25,10 @@ from parsl.launchers import MpiRunLauncher, AprunLauncher
 config = Config(
     scaling_enabled=True,
     provider=CobaltProvider(
-        queue='debug-flat-quad',
-        account='CSC249ADCD01',  # project name to submit the job
+        # queue='debug-flat-quad',
+        queue='analysis',
+        # account='CSC249ADCD01',  # project name to submit the job
+        account='APSDataAnalysis',
         launcher=AprunLauncher(overrides="-d 64"),
         worker_init='source activate dlhub-JPDC-theta',
         nodes_per_block={nodes},
