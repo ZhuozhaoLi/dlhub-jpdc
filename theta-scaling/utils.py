@@ -24,6 +24,8 @@ from parsl.launchers import MpiRunLauncher, AprunLauncher
 
 config = Config(
     scaling_enabled=True,
+    heartbeat_period=30,
+    heartbeat_threshold=120,
     provider=CobaltProvider(
         queue='debug-flat-quad',
         # queue='analysis',
@@ -35,7 +37,7 @@ config = Config(
         init_blocks=1,
         min_blocks=1,
         max_blocks=1,
-        cmd_timeout=60,
+        cmd_timeout=300,
         walltime='{walltime}',
     ),
     worker_mode="singularity",
