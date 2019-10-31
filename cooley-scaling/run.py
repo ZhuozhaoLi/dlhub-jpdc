@@ -6,13 +6,13 @@ import time
 import sqlite3
 import subprocess
 from utils import dlhub_test, template, inputs
-
+import uuid
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-r", "--redis_hostname", type=str, default='127.0.0.1',
                     help="Hostname of the Redis server")
 parser.add_argument("-e", "--endpoint_id", type=str,
-                    default="db1c7660-2de1-4704-b8f2-8be8e67cfeaf",
+                    default="ac0652aa-c057-422b-900a-4cf67f83233c",
                     help="Endpoint_id")
 parser.add_argument("-y", "--endpoint_name", type=str,
                     default="dlhub-theta-remote",
@@ -103,16 +103,18 @@ while True:
         break
 
 # Define the test function
-def test(tasks=5000, data=[1], timeout=None):
+def test(tasks=5000, trial=1, data=[1], timeout=None):
     start_submit = time.time()
+    tmp = str(uuid.uuid4())[:8]
     for i in range(tasks):
-        ser_args = fxs.serialize([i])
-        ser_kwargs = fxs.serialize({'data': data})
+        ser_args = fxs.serialize([data])
+        ser_kwargs = fxs.serialize({})
         input_data = fxs.pack_buffers([ser_args, ser_kwargs])
         payload = fn_code + input_data
         # container_id = "odd" if i%2 else "even"
         container_id = "RAW"
-        tasks_rq.put(f"0{i};{container_id}", 'task', payload)
+        task_id = tmp + str(i)
+        tasks_rq.put(f"0{task_id};{container_id}", 'task', payload)
     end_submit = time.time()
     print("Launched {} tasks in {}".format(tasks, end_submit - start_submit))
 
@@ -144,15 +146,15 @@ print("\nStart testing")
 for trial in range(args.trials):
     print("Testing trial {}/{}".format(trial+1, args.trials))
     try:
-        start_submit, end_submit, returned = test(tasks=args.tasks, data=data, timeout=300)
+        start_submit, end_submit, returned = test(tasks=args.tasks, trial=trial, data=data, timeout=300)
         # Recording results to db
-        data = ('Cooley', start_submit, end_submit, returned,
+        result_data = ('Cooley', start_submit, end_submit, returned,
                 args.num_workers, args.tasks, args.container_type)
-        print('inserting {}'.format(str(data)))
+        print('inserting {}'.format(str(result_data)))
         db.execute("""
             insert into
             tasks (platform, start_submit, end_submit, returned, num_workers, tasks_per_trial, container_type)
-            values (?, ?, ?, ?, ?, ?, ?)""", data
+            values (?, ?, ?, ?, ?, ?, ?)""", result_data
         )
         db.commit()
     except Exception as e:
