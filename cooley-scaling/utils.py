@@ -1,6 +1,6 @@
 import base64
 
-def dlhub_test(i, data=[1, 2, 3]):
+def dlhub_test(data):
     import sys, time, os
     sys.path.append("/app")
     os.chdir("/app")
@@ -12,6 +12,7 @@ def dlhub_test(i, data=[1, 2, 3]):
     if 'shim' not in globals():
         import dlhub_shim
         shim = dlhub_shim
+    return data
     x = shim.run(data)
     end = time.time()
     return (x, (end-start) * 1000)
