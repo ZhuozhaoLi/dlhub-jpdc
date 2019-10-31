@@ -1,6 +1,6 @@
 import base64
 
-def dlhub_test(i, data=[1, 2, 3]):
+def dlhub_test(data):
     import sys, time, os
     sys.path.append("/app")
     os.chdir("/app")

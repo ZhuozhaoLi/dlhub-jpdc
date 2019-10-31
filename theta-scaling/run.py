@@ -6,13 +6,13 @@ import time
 import sqlite3
 import subprocess
 from utils import dlhub_test, template, inputs
-
+import uuid
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-r", "--redis_hostname", type=str, default='127.0.0.1',
                     help="Hostname of the Redis server")
 parser.add_argument("-e", "--endpoint_id", type=str,
-                    default="5dc807eb-da52-4979-8210-1835c7280e76",
+                    default="e6f0214b-dd98-4a96-a1ba-aac38852b08b",
                     help="Endpoint_id")
 parser.add_argument("-y", "--endpoint_name", type=str,
                     default="dlhub-theta-remote",
@@ -78,7 +78,7 @@ except Exception as e:
     print(e)
 print("Started the endpoint {}".format(args.endpoint_id))
 print("Wating 60 seconds for the endpoint to start")
-time.sleep(0)
+time.sleep(60)
 
 # Connect to the task and result redis queue
 endpoint_id = args.endpoint_id
@@ -94,25 +94,26 @@ ser_code = fxs.serialize(dlhub_test)
 fn_code = fxs.pack_buffers([ser_code])
 print("Code serialized")
 
-# Make sure there is no previous result left
-while True:
-    try:
-        x = results_rq.get(timeout=1)
-    except:
-        print("No more results left")
-        break
-
 # Define the test function
 def test(tasks=5000, data=[1], timeout=None):
+    # Make sure there is no previous result left
+    while True:
+        try:
+            x = results_rq.get(timeout=1)
+        except:
+            print("No more results left")
+            break
+    tmp = str(uuid.uuid4())[:8]
     start_submit = time.time()
     for i in range(tasks):
-        ser_args = fxs.serialize([i])
-        ser_kwargs = fxs.serialize({'data': data})
+        ser_args = fxs.serialize([data])
+        ser_kwargs = fxs.serialize({})
         input_data = fxs.pack_buffers([ser_args, ser_kwargs])
         payload = fn_code + input_data
         # container_id = "odd" if i%2 else "even"
         container_id = "RAW"
-        tasks_rq.put(f"0{i};{container_id}", 'task', payload)
+        task_id = tmp + str(i)
+        tasks_rq.put(f"0{task_id};{container_id}", 'task', payload)
     end_submit = time.time()
     print("Launched {} tasks in {}".format(tasks, end_submit - start_submit))
 
@@ -146,13 +147,13 @@ for trial in range(args.trials):
     try:
         start_submit, end_submit, returned = test(tasks=args.tasks, data=data, timeout=300)
         # Recording results to db
-        data = ('Theta', start_submit, end_submit, returned,
+        result_data = ('Theta', start_submit, end_submit, returned,
                 args.num_workers, args.tasks, args.container_type)
-        print('inserting {}'.format(str(data)))
+        print('inserting {}'.format(str(result_data)))
         db.execute("""
             insert into
             tasks (platform, start_submit, end_submit, returned, num_workers, tasks_per_trial, container_type)
-            values (?, ?, ?, ?, ?, ?, ?)""", data
+            values (?, ?, ?, ?, ?, ?, ?)""", result_data
         )
         db.commit()
     except Exception as e:
@@ -168,5 +169,5 @@ except Exception as e:
     print(e)
 print("\nStopped the endpoint {}".format(args.endpoint_id))
 print("Wating 180 seconds for the endpoint to stop")
-time.sleep(180)
+time.sleep(600)
 
