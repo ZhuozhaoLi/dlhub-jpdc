@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-r", "--redis_hostname", type=str, default='127.0.0.1',
                     help="Hostname of the Redis server")
 parser.add_argument("-e", "--endpoint_id", type=str,
-                    default="e6f0214b-dd98-4a96-a1ba-aac38852b08b",
+                    default="c9d6e4bf-ecab-4288-8fd2-9d12b1ed854f",
                     help="Endpoint_id")
 parser.add_argument("-y", "--endpoint_name", type=str,
                     default="dlhub-theta-remote",
@@ -42,7 +42,8 @@ db.execute("""create table if not exists tasks(
     returned float,
     num_workers int,
     tasks_per_trial int,
-    container_type text)"""
+    container_type text,
+    failed int)"""
 )
 print("Database initiated")
 
@@ -128,13 +129,15 @@ def test(tasks=5000, data=[1], timeout=None):
     print("Printing result once for validation")
     print("Result : ", res)
     try:
+        failed = False
         print("Result : ", fxs.deserialize(res[1]['result']))
     except:
+        failed = True
         print("Result : ", fxs.deserialize(res[1]['exception']))
 
     print("Time to complete {} tasks: {:8.3f} s".format(tasks, delta))
     print("Throughput : {:8.3f} Tasks/s".format(tasks / delta))
-    return start_submit, end_submit, returned
+    return start_submit, end_submit, returned, failed
 
 # Priming the endpoint with tasks
 print("\nAll initialization done. Start priming the endpoint")
@@ -145,15 +148,15 @@ print("\nStart testing")
 for trial in range(args.trials):
     print("Testing trial {}/{}".format(trial+1, args.trials))
     try:
-        start_submit, end_submit, returned = test(tasks=args.tasks, data=data, timeout=300)
+        start_submit, end_submit, returned, failed = test(tasks=args.tasks, data=data, timeout=300)
         # Recording results to db
         result_data = ('Theta', start_submit, end_submit, returned,
-                args.num_workers, args.tasks, args.container_type)
+                args.num_workers, args.tasks, args.container_type, failed)
         print('inserting {}'.format(str(result_data)))
         db.execute("""
             insert into
-            tasks (platform, start_submit, end_submit, returned, num_workers, tasks_per_trial, container_type)
-            values (?, ?, ?, ?, ?, ?, ?)""", result_data
+            tasks (platform, start_submit, end_submit, returned, num_workers, tasks_per_trial, container_type, failed)
+            values (?, ?, ?, ?, ?, ?, ?, ?)""", result_data
         )
         db.commit()
     except Exception as e:

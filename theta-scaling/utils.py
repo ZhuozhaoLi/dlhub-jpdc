@@ -27,10 +27,10 @@ config = Config(
     heartbeat_period=30,
     heartbeat_threshold=120,
     provider=CobaltProvider(
-        queue='debug-flat-quad',
-        # queue='analysis',
-        account='CSC249ADCD01',  # project name to submit the job
-        # account='APSDataAnalysis',
+        # queue='debug-flat-quad',
+        queue='analysis',
+        # account='CSC249ADCD01',  # project name to submit the job
+        account='APSDataAnalysis',
         launcher=AprunLauncher(overrides="-d 64"),
         worker_init='source activate dlhub-JPDC-theta',
         nodes_per_block={nodes},
