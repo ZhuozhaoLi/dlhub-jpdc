@@ -12,8 +12,8 @@ queue='default'
 #for c in "noop" "oqmd" "matminer-featurize" "matminer-util" "cifar10" "inception";
 for c in "inception";
 do
-    #for i in 1 2 4 8 12 24 48 96 192 384;
-    for i in 4;
+    for i in 1 2 4 8 12 24 48 96 192 384;
+    #for i in 4;
     do
         echo "Running with $i $c containers"
         echo "priming with $(($i * 4)) tasks"

@@ -12,7 +12,6 @@ def dlhub_test(data):
     if 'shim' not in globals():
         import dlhub_shim
         shim = dlhub_shim
-    return data
     x = shim.run(data)
     end = time.time()
     return (x, (end-start) * 1000)

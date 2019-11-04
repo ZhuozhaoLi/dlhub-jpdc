@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-r", "--redis_hostname", type=str, default='127.0.0.1',
                     help="Hostname of the Redis server")
 parser.add_argument("-e", "--endpoint_id", type=str,
-                    default="ac0652aa-c057-422b-900a-4cf67f83233c",
+                    default="16c3c0b7-b7fa-4aa7-9c92-f3151c62bbe4",
                     help="Endpoint_id")
 parser.add_argument("-y", "--endpoint_name", type=str,
                     default="dlhub-theta-remote",
