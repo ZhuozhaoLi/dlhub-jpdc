@@ -14,7 +14,7 @@ def dlhub_test(data):
         shim = dlhub_shim
     res = []
     for d in data:
-        x = shim.run(data)
+        x = shim.run(d)
         res.append(x)
     end = time.time()
     return (res, (end - start) * 1000)
@@ -51,7 +51,7 @@ config = Config(
 
 inputs = {
     'noop':
-    [1, 2, 3],
+    [[1, 2, 3]],
     'matminer-featurize':
     [{'composition_object': 'gANjcHltYXRnZW4uY29yZS5jb21wb3NpdGlvbgpDb21wb3NpdGlvbgpxACmBcQF9cQIoWA4AAABh\nbGxvd19uZWdhdGl2ZXEDiVgHAAAAX25hdG9tc3EER0AUAAAAAAAAWAUAAABfZGF0YXEFfXEGKGNw\neW1hdGdlbi5jb3JlLnBlcmlvZGljX3RhYmxlCkVsZW1lbnQKcQdYAgAAAEFscQiFcQlScQpHQAAA\nAAAAAABoB1gBAAAAT3ELhXEMUnENR0AIAAAAAAAAdXViLg==\n'}], 
     'matminer-util': 

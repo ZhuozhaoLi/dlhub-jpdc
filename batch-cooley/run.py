@@ -14,7 +14,7 @@ parser.add_argument("-y", "--endpoint_name", type=str,
                     default="dlhub-cooley-batching",
                     help="Endpoint_name")
 parser.add_argument("-e", "--endpoint_id", type=str,
-                    default="f5b5ff11-706e-4534-9a43-7eb5a1ae5a9e",
+                    default="18db8ad9-ab50-4ab6-b01d-655b4b5d97f3",
                     help="Endpoint_id")
 parser.add_argument("-w", "--walltime",
                     type=str, default='00:20:00', help="walltime")
@@ -69,10 +69,10 @@ print("The functoin uuid is {}".format(func_uuid))
 fxs = FuncXSerializer()
 
 def test(tasks=1, data=[1], timeout=float('inf'), endpoint_id=None, function_id=None, poll=0.1):
-    
+
+    start = time.time()
     res = fxc.run(data, endpoint_id=endpoint_id, function_id=function_id) 
     print("Task ID: {}".format(res))
-    start = time.time()
     while time.time() - start <= timeout:
         a = fxc.get_task_status(res)
         if 'status' in a:
@@ -99,17 +99,17 @@ def test(tasks=1, data=[1], timeout=float('inf'), endpoint_id=None, function_id=
 
 # Priming the endpoint with tasks
 print("\nAll initialization done. Start priming the endpoint")
-test(tasks=1, data=[data], endpoint_id=args.endpoint_id, function_id=func_uuid)
+test(tasks=1, data=[data], endpoint_id=args.endpoint_id, function_id=func_uuid, poll=10)
 print("Finished priming")
 
 for i in range(14):
     num_tasks = 2 ** i
     if num_tasks > args.tasks:
         break
-    data = [data for t in range(num_tasks)]
+    inputs = [data for n in range(num_tasks)]
     for j in range(args.trials):
         try:
-            start, end, completion_time, failed = test(tasks=num_tasks, data=data, endpoint_id=args.endpoint_id, function_id=func_uuid)
+            start, end, completion_time, failed = test(tasks=num_tasks, data=inputs, endpoint_id=args.endpoint_id, function_id=func_uuid)
             result_data = ('Cooley', start, end, completion_time, num_tasks, args.container_type, failed)
             print('inserting {}'.format(str(result_data)))
             db.execute("""
